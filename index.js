@@ -3,12 +3,11 @@
 var cloneDeep = require('lodash.clonedeep');
 var result = require('lodash.result');
 
-function hasChanged(params) {
-  var dependencies = params.dependencies;
-  var access = params.access;
-  var comparison = params.comparison;
-  var obj = params.obj;
-  var storedValues = params.storedValues;
+function hasChanged(obj, options) {
+  var dependencies = options.dependencies;
+  var getMethod = options.getMethod;
+  var compareMethod = options.compareMethod;
+  var storedValues = options.storedValues;
 
   var len = dependencies.length;
   var i = 0;
@@ -16,8 +15,8 @@ function hasChanged(params) {
 
   while (len--) {
     var dep = dependencies[i++];
-    var value = access(obj, dep);
-    if (!comparison(storedValues[dep], value)) {
+    var value = getMethod(obj, dep);
+    if (!compareMethod(storedValues[dep], value)) {
       changed = true;
       // update with new value
       storedValues[dep] = cloneDeep(value);
@@ -32,58 +31,58 @@ function getValues(storedValues, dependencies) {
   });
 }
 
-module.exports = function derivedProperty(params) {
-  var obj = params.obj;
-  if (!obj) {
-    throw new TypeError('Expected `obj` to be an object');
-  }
-  // derived property name
-  var property = params.property;
-  if (!property || typeof property !== 'string') {
-    throw new TypeError('Expected `property` to be a string');
-  }
+module.exports = function derivedProperty(options) {
+  var obj = options.obj;
   // getter method for derived property
-  var getter = params.getter;
+  var getter = options.getter;
+  // watched dependencies
+  var dependencies = options.dependencies || [];
+  // should cache result
+  var cache = options.cache === undefined ? Boolean(options.cache) : true;
+  // getMethod method for getting dependency values
+  var getMethod = options.getMethod || result;
+  // compare method for dependencies' values
+  var compareMethod = options.compareMethod || function (oldValue, newValue) {
+    return oldValue === newValue;
+  };
   if (typeof getter !== 'function') {
     throw new TypeError('Expected `getter` to be a function but got ' + typeof getter);
   }
-  // watched dependencies
-  var dependencies = params.dependencies || [];
-  // should cache result
-  var cache = params.cache === undefined ? Boolean(params.cache) : true;
-  // access method for getting dependency values
-  var access = params.access || result;
-  // compare method for dependency difference
-  var comparison = params.comparison || function (oldValue, newValue) {
-    return oldValue === newValue;
-  };
+  if (typeof obj !== 'object') {
+    throw new TypeError('Expected `obj` to be an object');
+  }
+  if (typeof getMethod !== 'function') {
+    throw new TypeError('Expected `getMethod` to be a function');
+  }
 
+  // clone dependency array
   dependencies = [].concat.apply([], dependencies);
 
+  // contains the stored dependency values
   var storedValues = {};
   var computedOnce = false;
   var hasDeps = dependencies.length > 0;
+  var changedOptions = {
+    compareMethod: compareMethod,
+    dependencies: dependencies,
+    getMethod: getMethod,
+    storedValues: storedValues,
+  };
   var computedValue;
 
   return {
     configurable: true,
     enumerable: true,
     get: function () {
-      if (!cache || !computedOnce || (hasDeps && hasChanged({
-        access: access,
-        comparison: comparison,
-        dependencies: dependencies,
-        obj: this,
-        storedValues: storedValues,
-      }))) {
-        var values = getValues(storedValues, dependencies);
-        computedValue = getter.apply(this, values);
+      if (!cache || !computedOnce || (hasDeps && hasChanged(this, changedOptions))) {
+        // recalculate and pass dependency values
+        computedValue = getter.apply(this, getValues(storedValues, dependencies));
         computedOnce = true;
       }
       return computedValue;
     },
     set: function () {
-      throw new TypeError("`" + property + "` is a derived property, it can't be set directly.");
+      throw new TypeError("This is a derived property, it can't be set directly.");
     }
   };
 };

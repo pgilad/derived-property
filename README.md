@@ -1,6 +1,6 @@
 # derived-property
 
-> Create derived properties for your objects
+> Create a derived property for an object
 
 *WIP*
 
@@ -17,7 +17,7 @@
 Install with [npm](https://www.npmjs.com/)
 
 ```sh
-$ npm i derived-property --save
+$ npm install derived-property --save
 ```
 
 ## Run tests
