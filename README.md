@@ -1,5 +1,7 @@
 # derived-property
 
+[![Build Status](https://travis-ci.org/pgilad/derived-property.svg?branch=master)](https://travis-ci.org/pgilad/derived-property)
+
 > Create a derived property for an object
 
 *WIP*
