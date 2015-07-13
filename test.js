@@ -2,262 +2,256 @@
 
 var expect = require('expect.js');
 var derivedProperty = require('./index');
+var Backbone = require('backbone');
+
+var skeleton = {
+  name: 'home',
+  ext: '.hbs',
+  dirname: 'views'
+};
 
 describe('derived property', function () {
-  it('should throw on missing required params', function () {
-    expect(derivedProperty).to.throwError(/missing/i);
+  describe('description', function () {
+    it('should throw on missing required params', function () {
+      expect(derivedProperty).to.throwError(/missing/i);
+      expect(derivedProperty).withArgs({}).to.throwError(/getter/);
+      expect(derivedProperty).withArgs({
+        getter: ''
+      }).to.throwError(/getter/);
 
-    expect(derivedProperty).withArgs({}).to.throwError(/getter/);
+      expect(derivedProperty).withArgs({
+        getter: function () {}
+      }).to.not.throwError();
 
-    expect(derivedProperty).withArgs({
-      getter: ''
-    }).to.throwError(/getter/);
+      expect(derivedProperty).withArgs({
+        getter: function () {},
+      }).to.not.throwError();
 
-    expect(derivedProperty).withArgs({
-      getter: function () {}
-    }).to.throwError(/obj/);
+      expect(derivedProperty).withArgs({
+        getter: function () {},
+      }).to.not.throwError();
 
-    expect(derivedProperty).withArgs({
-      getter: function () {},
-      obj: ''
-    }).to.throwError(/obj/);
+      expect(derivedProperty).withArgs({
+        getter: function () {},
+        getMethod: 1
+      }).to.throwError(/getMethod/);
 
-    expect(derivedProperty).withArgs({
-      getter: function () {},
-      obj: {}
-    }).to.not.throwError();
-
-    expect(derivedProperty).withArgs({
-      getter: function () {},
-      obj: {},
-      getMethod: 1
-    }).to.throwError(/getMethod/);
-
-    expect(derivedProperty).withArgs({
-      getter: function () {},
-      obj: {},
-      getMethod: function () {}
-    }).to.not.throwError();
-  });
-
-  it('should work without dependencies with cache', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: 'views'
-    };
-
-    var called = 0;
-
-    var derived = derivedProperty({
-      obj: obj,
-      getter: function () {
-        called++;
-        return this.dirname + '/' + this.name + this.ext;
-      }
+      expect(derivedProperty).withArgs({
+        getter: function () {},
+        getMethod: function () {}
+      }).to.not.throwError();
     });
 
-    Object.defineProperty(obj, 'path', derived);
+    it('should work with cache only', function () {
+      var obj = Object.create(skeleton);
+      var called = 0;
 
-    expect(obj.path).to.eql('views/home.hbs');
-    obj.dirname = '_gh_pages';
-    obj.ext = '.html';
-    // cache is true and there are no dependencies
-    expect(obj.path).to.equal('views/home.hbs');
-    expect(called).to.equal(1);
-  });
+      var derived = derivedProperty({
+        getter: function () {
+          called++;
+          return this.dirname + '/' + this.name + this.ext;
+        }
+      });
+      Object.defineProperty(obj, 'path', derived);
 
-  it('should work without dependencies without cache', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: 'views'
-    };
-
-    var called = 0;
-
-    var derived = derivedProperty({
-      obj: obj,
-      cache: false,
-      getter: function () {
-        called++;
-        return this.dirname + '/' + this.name + this.ext;
-      }
+      expect(obj.path).to.eql('views/home.hbs');
+      obj.dirname = '_gh_pages';
+      obj.ext = '.html';
+      // cache is true and there are no dependencies
+      expect(obj.path).to.equal('views/home.hbs');
+      expect(called).to.equal(1);
     });
 
-    Object.defineProperty(obj, 'path', derived);
+    it('should work without dependencies or cache', function () {
+      var obj = Object.create(skeleton);
+      var called = 0;
 
-    expect(obj.path).to.eql('views/home.hbs');
-    obj.dirname = '_gh_pages';
-    obj.ext = '.html';
-    // cache is true and there are no dependencies
-    expect(obj.path).to.equal('_gh_pages/home.html');
-    expect(called).to.equal(2);
-  });
+      var derived = derivedProperty({
+        cache: false,
+        getter: function () {
+          called++;
+          return this.dirname + '/' + this.name + this.ext;
+        }
+      });
 
-  it('should work with dependencies and cache', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: 'views'
-    };
+      Object.defineProperty(obj, 'path', derived);
 
-    var called = 0;
-    var derived = derivedProperty({
-      obj: obj,
-      cache: true,
-      dependencies: ['dirname'],
-      getter: function () {
-        called++;
-        return this.dirname + '/' + this.name + this.ext;
-      }
+      expect(obj.path).to.eql('views/home.hbs');
+      obj.dirname = '_gh_pages';
+      obj.ext = '.html';
+      // cache is true and there are no dependencies
+      expect(obj.path).to.equal('_gh_pages/home.html');
+      expect(called).to.equal(2);
     });
 
-    Object.defineProperty(obj, 'path', derived);
+    it('should work with dependencies and cache', function () {
+      var obj = Object.create(skeleton);
+      var called = 0;
 
-    expect(obj.path).to.eql('views/home.hbs');
-    obj.dirname = '_gh_pages';
-    obj.ext = '.html';
-    // cache is true and there are no dependencies
-    expect(obj.path).to.equal('_gh_pages/home.html');
-    expect(called).to.equal(2);
-  });
+      var derived = derivedProperty({
+        cache: true,
+        dependencies: ['dirname'],
+        getter: function () {
+          called++;
+          return this.dirname + '/' + this.name + this.ext;
+        }
+      });
+      Object.defineProperty(obj, 'path', derived);
 
-  it('should work with dependencies and without cache', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: 'views'
-    };
-
-    var called = 0;
-    var derived = derivedProperty({
-      obj: obj,
-      cache: false,
-      dependencies: ['dirname'],
-      getter: function () {
-        called++;
-        return this.dirname + '/' + this.name + this.ext;
-      }
+      expect(obj.path).to.eql('views/home.hbs');
+      obj.dirname = '_gh_pages';
+      obj.ext = '.html';
+      // cache is true and there are no dependencies
+      expect(obj.path).to.equal('_gh_pages/home.html');
+      expect(called).to.equal(2);
     });
 
-    Object.defineProperty(obj, 'path', derived);
+    it('should work with dependencies and without cache', function () {
+      var obj = Object.create(skeleton);
+      var called = 0;
 
-    expect(obj.path).to.eql('views/home.hbs');
-    obj.dirname = '_gh_pages';
-    obj.ext = '.html';
-    // cache is true and there are no dependencies
-    expect(obj.path).to.equal('_gh_pages/home.html');
-    expect(called).to.equal(2);
-  });
+      var derived = derivedProperty({
+        cache: false,
+        dependencies: ['dirname'],
+        getter: function () {
+          called++;
+          return this.dirname + '/' + this.name + this.ext;
+        }
+      });
+      Object.defineProperty(obj, 'path', derived);
 
-  it('should work with changed function dependencies', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: function () {
-        return 'views';
-      }
-    };
-
-    var called = 0;
-    var derived = derivedProperty({
-      obj: obj,
-      dependencies: ['dirname'],
-      getter: function () {
-        called++;
-        return this.dirname() + '/' + this.name + this.ext;
-      }
+      expect(obj.path).to.eql('views/home.hbs');
+      obj.dirname = '_gh_pages';
+      obj.ext = '.html';
+      // cache is true and there are no dependencies
+      expect(obj.path).to.equal('_gh_pages/home.html');
+      expect(called).to.equal(2);
     });
 
-    Object.defineProperty(obj, 'path', derived);
+    it('should work with changed function dependencies', function () {
+      var obj = {
+        name: 'home',
+        ext: '.hbs',
+        dirname: function () {
+          return 'views';
+        }
+      };
 
-    expect(obj.path).to.eql('views/home.hbs');
-    obj.dirname = function () {
-      return 'views2';
-    };
-    obj.ext = '.html';
-    // cache is true and there are no dependencies
-    expect(obj.path).to.equal('views2/home.html');
-    expect(called).to.equal(2);
-  });
+      var called = 0;
+      var derived = derivedProperty({
+        dependencies: ['dirname'],
+        getter: function () {
+          called++;
+          return this.dirname() + '/' + this.name + this.ext;
+        }
+      });
 
-  it('should work with unchanged function dependencies', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: function () {
-        return 'views';
-      }
-    };
+      Object.defineProperty(obj, 'path', derived);
 
-    var called = 0;
-    var derived = derivedProperty({
-      obj: obj,
-      dependencies: ['dirname'],
-      getter: function () {
-        called++;
-        return this.dirname() + '/' + this.name + this.ext;
-      }
+      expect(obj.path).to.eql('views/home.hbs');
+      obj.dirname = function () {
+        return 'views2';
+      };
+      obj.ext = '.html';
+      // cache is true and there are no dependencies
+      expect(obj.path).to.equal('views2/home.html');
+      expect(called).to.equal(2);
     });
 
-    Object.defineProperty(obj, 'path', derived);
+    it('should work with unchanged function dependencies', function () {
+      var obj = {
+        name: 'home',
+        ext: '.hbs',
+        dirname: function () {
+          return 'views';
+        }
+      };
 
-    expect(obj.path).to.eql('views/home.hbs');
-    obj.ext = '.html';
-    // cache is true and dependency hasn't changed
-    expect(obj.path).to.equal('views/home.hbs');
-    expect(called).to.equal(1);
-  });
+      var called = 0;
+      var derived = derivedProperty({
+        dependencies: ['dirname'],
+        getter: function () {
+          called++;
+          return this.dirname() + '/' + this.name + this.ext;
+        }
+      });
 
-  it('should pass dependency values in getter', function () {
-    var obj = {
-      name: 'home',
-      ext: '.hbs',
-      dirname: 'views'
-    };
+      Object.defineProperty(obj, 'path', derived);
 
-    var derived = derivedProperty({
-      obj: obj,
-      dependencies: ['dirname', 'ext'],
-      getter: function (dirname, ext) {
-        expect(dirname).to.eql(obj.dirname);
-        expect(ext).to.eql(obj.ext);
-        return dirname + '/' + this.name + ext;
-      }
+      expect(obj.path).to.eql('views/home.hbs');
+      obj.ext = '.html';
+      // cache is true and dependency hasn't changed
+      expect(obj.path).to.equal('views/home.hbs');
+      expect(called).to.equal(1);
     });
 
-    Object.defineProperty(obj, 'path', derived);
-    expect(obj.path).to.eql('views/home.hbs');
-  });
+    it('should pass dependency values in getter', function () {
+      var obj = Object.create(skeleton);
+      var derived = derivedProperty({
+        dependencies: ['dirname', 'ext'],
+        getter: function (dirname, ext) {
+          expect(dirname).to.eql(obj.dirname);
+          expect(ext).to.eql(obj.ext);
+          return dirname + '/' + this.name + ext;
+        }
+      });
 
-  it('should work with deep dependencies', function () {
-    var obj = {
-      name: {
-        first: 'Gilad',
-        last: 'Peleg'
-      }
-    };
-
-    var called = 0;
-    var derived = derivedProperty({
-      obj: obj,
-      dependencies: ['name.first'],
-      getter: function () {
-        called++;
-        return this.name.first + ' ' + this.name.last;
-      }
+      Object.defineProperty(obj, 'path', derived);
+      expect(obj.path).to.eql('views/home.hbs');
     });
 
-    Object.defineProperty(obj, 'displayName', derived);
+    it('should work with deep dependencies', function () {
+      var obj = {
+        name: {
+          first: 'Gilad',
+          last: 'Peleg'
+        }
+      };
 
-    expect(obj.displayName).to.eql('Gilad Peleg');
-    obj.name.first = 'John';
-    expect(obj.displayName).to.eql('John Peleg');
-    obj.name.last = 'Doe';
-    // last name is not a dependency
-    expect(obj.displayName).to.eql('John Peleg');
-    expect(called).to.equal(2);
+      var called = 0;
+      var derived = derivedProperty({
+        dependencies: ['name.first'],
+        getter: function () {
+          called++;
+          return this.name.first + ' ' + this.name.last;
+        }
+      });
+      Object.defineProperty(obj, 'displayName', derived);
+
+      expect(obj.displayName).to.eql('Gilad Peleg');
+      obj.name.first = 'John';
+      expect(obj.displayName).to.eql('John Peleg');
+      obj.name.last = 'Doe';
+      // last name is not a dependency
+      expect(obj.displayName).to.eql('John Peleg');
+      expect(called).to.equal(2);
+    });
+
+    it('should be able to recycle derived property', function () {
+      var obj = {
+        name: {
+          first: 'Gilad',
+          last: 'Peleg'
+        }
+      };
+
+      var called = 0;
+      var derived = derivedProperty({
+        dependencies: ['name.first', 'name.last'],
+        getter: function (first, last) {
+          called++;
+          return first + ' ' + last;
+        }
+      });
+      Object.defineProperty(obj, 'displayName', derived);
+      Object.defineProperty(obj, 'nickname', derived);
+
+      expect(obj.displayName).to.eql('Gilad Peleg');
+      expect(obj.nickname).to.eql('Gilad Peleg');
+      obj.name.first = 'John';
+      expect(obj.displayName).to.eql(obj.nickname);
+      expect(called).to.equal(2);
+    });
   });
 
   describe('custom overrides', function () {
@@ -269,7 +263,6 @@ describe('derived property', function () {
 
       var called = 0;
       var derived = derivedProperty({
-        obj: obj,
         dependencies: ['first', 'last'],
         getMethod: function (obj, dep) {
           return obj[dep] + '1';
@@ -290,6 +283,52 @@ describe('derived property', function () {
       expect(called).to.equal(3);
     });
 
+    it('should work with a backbone model defined on prototype', function () {
+      var Person = Backbone.Model.extend({});
+      var person = new Person({
+        first: 'Gilad',
+        last: 'Peleg'
+      });
+
+      var derived = derivedProperty({
+        dependencies: ['first', 'last'],
+        getMethod: function (obj, dep) {
+          // proxy a backbone method
+          return obj.get(dep);
+        },
+        getter: function (first, last) {
+          return first + ' ' + last;
+        }
+      });
+      Object.defineProperty(Person.prototype, 'displayName', derived);
+
+      expect(person.hasOwnProperty('displayName')).to.be(false);
+      expect(person.displayName).to.eql('Gilad Peleg');
+    });
+
+    it('should work with a backbone model defined on instance', function () {
+      var person = new Backbone.Model({
+        first: 'Gilad',
+        last: 'Peleg'
+      });
+
+      var derived = derivedProperty({
+        obj: person,
+        dependencies: ['first', 'last'],
+        getMethod: function (obj, dep) {
+          // proxy a backbone method
+          return obj.get(dep);
+        },
+        getter: function (first, last) {
+          return first + ' ' + last;
+        }
+      });
+
+      Object.defineProperty(person, 'displayName', derived);
+      expect(person.hasOwnProperty('displayName')).to.be(true);
+      expect(person.displayName).to.eql('Gilad Peleg');
+    });
+
     it('should work with a custom compareMethod', function () {
       var obj = {
         nested1: {
@@ -302,7 +341,6 @@ describe('derived property', function () {
 
       var called = 0;
       var derived = derivedProperty({
-        obj: obj,
         dependencies: ['nested1', 'nested2'],
         compareMethod: function (oldValue, newValue) {
           return newValue.value === oldValue.value + 1;
@@ -325,4 +363,3 @@ describe('derived property', function () {
     });
   });
 });
-

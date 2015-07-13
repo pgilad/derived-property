@@ -39,7 +39,6 @@ var obj = {
 }
 
 var displayName = derivedProperty({
-  obj: obj,
   dependencies: ['first', 'last'],
   getter: function (first, last) {
     return first + ' ' + last;
@@ -68,7 +67,6 @@ Create a derived property. Returns a `response` that should be applied using `Ob
 
 **options**
 
-* `obj` **{Object}**: Object to observe the dependencies on (usually also the object that the derived property will be set on as well).
 * `getter` **{Function}**: Getter function to do the calculation. Gets the values of dependencies as arguments.
 * `dependencies` **{Array}**: Optional list of properties to depend on.
 * `cache` **{Boolean}**: Whether to use the cached result if dependencies haven't changed. Defaults to `true`. Set off for non-pure derived properties (i.e - relies on `Date.now()`).

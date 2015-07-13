@@ -45,7 +45,6 @@ function derivedProperty(options) {
   if (!options) {
     throw new TypeError('Missing required options');
   }
-  var obj = options.obj;
   // getter method for derived property
   var getter = options.getter;
   // watched dependencies
@@ -60,9 +59,6 @@ function derivedProperty(options) {
   };
   if (typeof getter !== 'function') {
     throw new TypeError('Expected `getter` to be a function but got ' + typeof getter);
-  }
-  if (typeof obj !== 'object') {
-    throw new TypeError('Expected `obj` to be an object');
   }
   if (typeof getMethod !== 'function') {
     throw new TypeError('Expected `getMethod` to be a function');
