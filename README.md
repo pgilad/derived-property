@@ -6,11 +6,11 @@
 > Create a derived property for an object
 
 * [Install](#install)
-* [Run tests](#run-tests)
 * [Usage](#usage)
 * [API](#api)
 * [Contributing](#contributing)
-* [Author](#author)
+* [Run tests](#run-tests)
+* [Related](#related)
 * [License](#license)
 
 ## Install
@@ -19,12 +19,6 @@ Install with [npm](https://www.npmjs.com/)
 
 ```sh
 $ npm install derived-property --save
-```
-
-## Run tests
-
-```sh
-$ npm test
 ```
 
 ## Usage
@@ -75,6 +69,12 @@ Create a derived property. Returns a `response` that should be applied using `Ob
 ## Contributing
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/pgilad/derived-property/issues)
+
+## Run tests
+
+```sh
+$ npm test
+```
 
 ## Related
 
