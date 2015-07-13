@@ -1,0 +1,33 @@
+{
+  "name": "derived-property",
+  "description": "Create derived properties for your objects",
+  "version": "1.0.0",
+  "author": "Gilad Peleg <giladp007@gmail.com> (http://giladpeleg.com)",
+  "repository": "pgilad/derived-property",
+  "license": "MIT",
+  "files": [
+    "index.js"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "^4.3.0"
+  },
+  "keywords": [
+    "derived",
+    "computed",
+    "property",
+    "magic"
+  ],
+  "dependencies": {
+    "get-value": "^0.3.2",
+    "lodash.clonedeep": "3.0.1",
+    "set-object": "^0.1.0"
+  }
+}
