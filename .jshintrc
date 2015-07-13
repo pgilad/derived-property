@@ -13,5 +13,6 @@
     "node": true,
     "sub": true,
     "undef": true,
-    "unused": true
+    "unused": true,
+    "mocha": true
 }

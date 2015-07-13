@@ -38,6 +38,10 @@ var derived = require('derived-property');
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/pgilad/derived-property/issues)
 
+## Related
+
+- [computed-property](https://github.com/doowb/computed-property)
+
 ## License
 
 MIT ©[Gilad Peleg](http://giladpeleg.com)

@@ -16,14 +16,16 @@
     "test": "mocha -R spec"
   },
   "devDependencies": {
-    "mocha": "*",
-    "should": "^4.3.0"
+    "expect.js": "^0.3.1",
+    "mocha": "*"
   },
   "keywords": [
     "derived",
     "computed",
     "property",
-    "magic"
+    "magic",
+    "watch",
+    "smart"
   ],
   "dependencies": {
     "lodash.clonedeep": "^3.0.1",

@@ -25,6 +25,16 @@ function hasChanged(obj, options) {
   return changed;
 }
 
+function setInitialValues(obj, options) {
+  var dependencies = options.dependencies;
+  var getMethod = options.getMethod;
+  var storedValues = options.storedValues;
+
+  dependencies.forEach(function (dep) {
+    storedValues[dep] = cloneDeep(getMethod(obj, dep));
+  });
+}
+
 function getValues(storedValues, dependencies) {
   return dependencies.map(function (dep) {
     return storedValues[dep];
@@ -32,13 +42,16 @@ function getValues(storedValues, dependencies) {
 }
 
 module.exports = function derivedProperty(options) {
+  if (!options) {
+    throw new TypeError('Missing required options');
+  }
   var obj = options.obj;
   // getter method for derived property
   var getter = options.getter;
   // watched dependencies
   var dependencies = options.dependencies || [];
   // should cache result
-  var cache = options.cache === undefined ? Boolean(options.cache) : true;
+  var cache = options.cache !== undefined ? Boolean(options.cache) : true;
   // getMethod method for getting dependency values
   var getMethod = options.getMethod || result;
   // compare method for dependencies' values
@@ -75,6 +88,9 @@ module.exports = function derivedProperty(options) {
     enumerable: true,
     get: function () {
       if (!cache || !computedOnce || (hasDeps && hasChanged(this, changedOptions))) {
+        if (!computedOnce) {
+          setInitialValues(this, changedOptions);
+        }
         // recalculate and pass dependency values
         computedValue = getter.apply(this, getValues(storedValues, dependencies));
         computedOnce = true;
