@@ -62,6 +62,19 @@ describe('derived property', function () {
       expect(called).to.equal(1);
     });
 
+    it('should throw when trying to set derived property', function () {
+      var obj = Object.create(skeleton);
+      var derived = derivedProperty({
+        getter: function () {
+          return this.dirname + '/' + this.name + this.ext;
+        }
+      });
+      Object.defineProperty(obj, 'path', derived);
+      expect(function() {
+        obj.path = 1;
+      }).to.throwError(/set/);
+    });
+
     it('should work without dependencies or cache', function () {
       var obj = Object.create(skeleton);
       var called = 0;

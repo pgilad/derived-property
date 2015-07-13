@@ -1,10 +1,9 @@
 # derived-property
 
 [![Build Status](https://travis-ci.org/pgilad/derived-property.svg?branch=master)](https://travis-ci.org/pgilad/derived-property)
+[![Coverage Status](https://coveralls.io/repos/pgilad/derived-property/badge.svg?branch=master&service=github)](https://coveralls.io/github/pgilad/derived-property?branch=master)
 
 > Create a derived property for an object
-
-*WIP*
 
 * [Install](#install)
 * [Run tests](#run-tests)

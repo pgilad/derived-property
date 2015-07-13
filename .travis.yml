@@ -1,11 +1,18 @@
 sudo: false
 language: node_js
 node_js:
-  - '0.10'
-  - '0.12'
-  - 'iojs'
+- '0.10'
+- '0.12'
+- iojs
 matrix:
   fast_finish: true
+env:
+  global:
+  - NODE_ENV=test
+  - secure: U2ytFy+rAKmcKOMz0ZrgmzWtkK9lu5ltHUFiP/24bbXGtksDcVIn/001yM7ZJmxMuQEe9bMHh3671Y/pzmyww2xTz+iN3Rno9KKTypumMaPEM68unzu95vL/HIlkox8pp4To8jyeti1TJbclY33HnhI/ELJ2LfndwbnM/0SggyaSk5FSenEe+tqV5f2sNOdfojINmecVfMBFglhvmEpmzsivMBPdZOz09RXUA+Xy5L/1s5tuR+xu0WWQKYgqbhmJB9uU5n4TTCOr9yExs1YiJjLCWg/QkpiNVj0Fe9CUvGz5AxVF+Vs71BNQwCaMmv6s81/y5snQ3dxAID+eZ8f0mgmrW8sVyIuMju8B+AElrel1VVbOdgpfphGLW1xuTY2dS+Y5vi96x5pRZA6MsbBSH/Iy6P1RON+hAcyOwmA0yCIHnMFWLK2DINtsirvgQWiQ/e8/RVfh9AkdDu32agjjtWSapljrDMxCvk6Y0sfrMr6kdUKN43dUhP46KalFRAwdzTAj7V5Gc4+sT+OWkKEPEfcS0oLHxF5ZfmVXopWxDJja1JjHC7l+R87WNRFpx/XpJz/V/YoO7IddFO8j0EKmACEuHhn/lhsF7rxtxYSk1BPezytCDcix8vyOy1Hy2/AuaP1y3x15x5dyEqWbK50AFQbYuEd/jgmi6qVv7v4oMn4=
+after_script:
+- npm run cover
+- npm run coveralls
 notifications:
   email:
     on_success: never
