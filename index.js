@@ -41,7 +41,7 @@ function getValues(storedValues, dependencies) {
   });
 }
 
-module.exports = function derivedProperty(options) {
+function derivedProperty(options) {
   if (!options) {
     throw new TypeError('Missing required options');
   }
@@ -101,4 +101,6 @@ module.exports = function derivedProperty(options) {
       throw new TypeError("This is a derived property, it can't be set directly.");
     }
   };
-};
+}
+
+module.exports = derivedProperty;
