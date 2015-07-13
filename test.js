@@ -3,7 +3,7 @@
 var expect = require('expect.js');
 var derivedProperty = require('./index');
 
-describe('derived', function () {
+describe('derived property', function () {
   it('should throw on missing required params', function () {
     expect(derivedProperty).to.throwError(/missing/i);
 
@@ -258,6 +258,71 @@ describe('derived', function () {
     // last name is not a dependency
     expect(obj.displayName).to.eql('John Peleg');
     expect(called).to.equal(2);
+  });
+
+  describe('custom overrides', function () {
+    it('should work with a custom getMethod', function () {
+      var obj = {
+        first: 'Gilad',
+        last: 'Peleg'
+      };
+
+      var called = 0;
+      var derived = derivedProperty({
+        obj: obj,
+        dependencies: ['first', 'last'],
+        getMethod: function (obj, dep) {
+          return obj[dep] + '1';
+        },
+        getter: function (first, last) {
+          called++;
+          return first + ' ' + last;
+        }
+      });
+
+      Object.defineProperty(obj, 'displayName', derived);
+
+      expect(obj.displayName).to.eql('Gilad1 Peleg1');
+      obj.first = 'John';
+      expect(obj.displayName).to.eql('John1 Peleg1');
+      obj.last = 'Doe';
+      expect(obj.displayName).to.eql('John1 Doe1');
+      expect(called).to.equal(3);
+    });
+
+    it('should work with a custom compareMethod', function () {
+      var obj = {
+        nested1: {
+          value: 1
+        },
+        nested2: {
+          value: 1
+        }
+      };
+
+      var called = 0;
+      var derived = derivedProperty({
+        obj: obj,
+        dependencies: ['nested1', 'nested2'],
+        compareMethod: function (oldValue, newValue) {
+          return newValue.value === oldValue.value + 1;
+        },
+        getter: function (nested1, nested2) {
+          called++;
+          return nested1.value + nested2.value;
+        }
+      });
+
+      Object.defineProperty(obj, 'sum', derived);
+
+      expect(obj.sum).to.eql(2);
+      obj.nested1.value = 2;
+      obj.nested2.value = 2;
+      expect(obj.sum).to.eql(2);
+      obj.nested2.value = 3;
+      // obj.nested1.value has presumably not changed
+      expect(obj.sum).to.eql(4);
+    });
   });
 });
 
